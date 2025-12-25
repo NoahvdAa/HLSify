@@ -2,7 +2,7 @@ import child from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-export class Stream {
+export class SegmentStream {
     _streamConfig;
     _process;
     _workingDir;
@@ -22,9 +22,9 @@ export class Stream {
         }
 
         this._workingDir = workingDir;
-        this._process = child.spawn('bash', ['-c', this._streamConfig.command], {
+        this._process = child.spawn('bash', ['-c', this._streamConfig.command.replaceAll('%TMP%', this._workingDir)], {
             cwd: this._workingDir,
-            stdio: 'ignore',
+            stdio: 'ignore'
         });
     }
 
@@ -34,7 +34,6 @@ export class Stream {
     }
 
     cleanup() {
-        console.log('C')
         if (this._process) {
             this._process.kill();
         }

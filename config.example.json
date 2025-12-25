@@ -4,9 +4,17 @@
   "httpAddress": "::",
   "streams" : {
     "myChannel": {
+      "type": "segment",
       "command": "ffmpeg -fflags +discardcorrupt -flags +global_header -i \"rtp://<endpoint>\" -map 0:v:0 -map 0:a:0 -c:v copy -c:a copy -hls_time 1 -hls_list_size 5 -hls_flags delete_segments+omit_endlist+independent_segments -start_number 0 live.m3u8",
       "playlist": "live.m3u8",
       "timeout": 15000
+    },
+    "myChannel-piped": {
+      "type": "piped",
+      "command": "ffmpeg -y -fflags +discardcorrupt -flags +global_header -i \"rtp://<endpoint>\" -map 0:v:0 -map 0:a:0 -c:v copy -c:a copy -f mpegts unix:/%TMP%/live.ts",
+      "pipe": "live.ts",
+      "timeout": 15000,
+      "mime": "video/mp2t"
     }
   }
 }
