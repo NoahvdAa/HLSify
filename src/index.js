@@ -15,6 +15,21 @@ if (!fs.existsSync(tmpFsPath)) {
     fs.mkdirSync(tmpFsPath);
 }
 
+app.get('/all.m3u8', (req, res) => {
+    res.header('Content-Type', 'application/vnd.apple.mpegurl');
+    let playlist = '#EXTM3U\n';
+    for (const [streamName, streamConfig] of Object.entries(config.streams)) {
+        playlist += `#EXTINF:-1,${streamConfig.displayName || streamName}\n`;
+        if (streamConfig.type === 'piped') {
+            playlist += `/${streamName}\n`;
+        } else {
+            playlist += `/${streamName}/${streamConfig.playlist}\n`;
+        }
+    }
+
+    res.send(playlist);
+});
+
 app.get('/:stream{/:file}', async (req, res, next) => {
     let streamConfig = config.streams[req.params.stream];
     if (!streamConfig) {
@@ -69,21 +84,6 @@ app.get('/:stream{/:file}', async (req, res, next) => {
         }
         connection.pipe(res);
     }
-});
-
-app.get('/all.m3u8', (req, res) => {
-    res.header('Content-Type', 'application/vnd.apple.mpegurl');
-    let playlist = '#EXTM3U\n';
-    for (const [streamName, streamConfig] of Object.entries(config.streams)) {
-        playlist += `#EXTINF:-1,${streamConfig.displayName || streamName}\n`;
-        if (streamConfig.type === 'piped') {
-            playlist += `/${streamName}\n`;
-        } else {
-            playlist += `/${streamName}/${streamConfig.playlist}\n`;
-        }
-    }
-
-    res.send(playlist);
 });
 
 setInterval(() => {
