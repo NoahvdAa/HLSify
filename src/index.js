@@ -37,7 +37,7 @@ app.get('/:stream{/:file}', async (req, res, next) => {
     }
 
     const abortController = new AbortController();
-    const { signal } = abortController;
+    const {signal} = abortController;
     req.on('close', () => abortController.abort());
 
     while (!activeStream.isReady()) {
@@ -69,6 +69,21 @@ app.get('/:stream{/:file}', async (req, res, next) => {
         }
         connection.pipe(res);
     }
+});
+
+app.get('/all.m3u8', (req, res) => {
+    res.header('Content-Type', 'application/vnd.apple.mpegurl');
+    let playlist = '#EXTM3U\n';
+    for (const [streamName, streamConfig] of Object.entries(config.streams)) {
+        playlist += `#EXTINF:-1,${streamConfig.displayName || streamName}\n`;
+        if (streamConfig.type === 'piped') {
+            playlist += `/${streamName}\n`;
+        } else {
+            playlist += `/${streamName}/${streamConfig.playlist}\n`;
+        }
+    }
+
+    res.send(playlist);
 });
 
 setInterval(() => {
