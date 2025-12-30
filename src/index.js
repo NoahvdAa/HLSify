@@ -16,10 +16,11 @@ if (!fs.existsSync(tmpFsPath)) {
 }
 
 app.get('/all.m3u8', (req, res) => {
-    res.header('Content-Type', 'application/vnd.apple.mpegurl');
+    res.header('Content-Type', 'audio/x-mpegurl');
     let playlist = '#EXTM3U\n';
     for (const [streamName, streamConfig] of Object.entries(config.streams)) {
-        playlist += `#EXTINF:-1,${streamConfig.displayName || streamName}\n`;
+        let displayName = streamConfig.displayName || streamName;
+        playlist += `#EXTINF:-1 tvg-id="${streamName}" tvg-name="${displayName}" group-title="Undefined",${displayName}\n`;
         if (streamConfig.type === 'piped') {
             playlist += `/${streamName}\n`;
         } else {
