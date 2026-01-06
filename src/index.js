@@ -16,15 +16,20 @@ if (!fs.existsSync(tmpFsPath)) {
 }
 
 app.get('/all.m3u8', (req, res) => {
+    let base = '';
+    if (req.query.absolute === 'true') {
+        base = `${req.protocol}://${req.get('host')}`;
+    }
+
     res.header('Content-Type', 'audio/x-mpegurl');
     let playlist = '#EXTM3U\n';
     for (const [streamName, streamConfig] of Object.entries(config.streams)) {
         let displayName = streamConfig.displayName || streamName;
         playlist += `#EXTINF:-1 tvg-id="${streamName}" tvg-name="${displayName}" group-title="Undefined",${displayName}\n`;
         if (streamConfig.type === 'piped') {
-            playlist += `/${streamName}\n`;
+            playlist += `${base}/${streamName}\n`;
         } else {
-            playlist += `/${streamName}/${streamConfig.playlist}\n`;
+            playlist += `${base}/${streamName}/${streamConfig.playlist}\n`;
         }
     }
 
